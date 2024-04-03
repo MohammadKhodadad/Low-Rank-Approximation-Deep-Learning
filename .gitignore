@@ -2,5 +2,6 @@
 *ubyte*
 *.csv
 *.pt
-*.txt
+# *.txt
 *ubyte
+# *.json

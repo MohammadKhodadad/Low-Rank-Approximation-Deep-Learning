@@ -2,6 +2,7 @@ import io
 import os
 import math
 import tqdm
+import json
 import torch
 import numpy as np
 import torch.nn as nn
@@ -121,6 +122,7 @@ def evaluate_perplexity(model, test_loader, tokenizer):
 def train(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
           epochs=5):
+    history=[]
     for epoch in range(epochs):
         total_loss = 0
         model.train()
@@ -135,8 +137,10 @@ def train(model,train_loader,test_loader,
             total_loss += loss.item()
             time_records.append(time() - start_time)
         average_loss=total_loss/len(train_loader)
-        print(f"EPOCH: {epoch}, loss: {average_loss}, test_perplexity: {evaluate_perplexity(model, test_loader, tokenizer)}")
-    return np.mean(time_records)
+        test_perplexity=evaluate_perplexity(model, test_loader, tokenizer)
+        history.append({'epoch':epoch,'train_loss':average_loss,'test_perplexity':test_perplexity})
+        print(f"EPOCH: {epoch}, loss: {average_loss}, test_perplexity: {test_perplexity}")
+    return np.mean(time_records),history
 
 
 
@@ -180,13 +184,18 @@ def run_pipeline(model,train_loader,test_loader,
     print('evaluation before training...')
     base_perplexity=evaluate_perplexity(model,test_loader,tokenizer)
     print('training...')
-    training_time=train(model,train_loader,test_loader,
+    training_time,history=train(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
           epochs)
     print('evaluation after training...')
     after_train_perplexity=evaluate_perplexity(model,test_loader,tokenizer)
     print("FINISHED.")
-    return {'name':name,'model_size':model_size,'trainable_params':trainable_params,'all_params':all_params,\
+
+    results={'name':name,'model_size':model_size,'trainable_params':trainable_params,'all_params':all_params,\
         'cpu_inference_time':cpu_inference_time,'gpu_inference_time':gpu_inference_time, \
-        'base_perplexity':base_perplexity, 'training_time':training_time, 'after_train_perplexity':after_train_perplexity}
+        'base_perplexity':base_perplexity, 'training_time':training_time,\
+            'history':history, 'after_train_perplexity':after_train_perplexity}
+    with open(f"../results/{name}.json",'w') as f:
+        json.dump(results,f)
+    return results
 
