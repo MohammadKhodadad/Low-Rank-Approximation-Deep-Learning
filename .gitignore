@@ -1,5 +1,6 @@
 *.pyc
 *ubyte*
-*csv
-*pt
+*.csv
+*.pt
+*.txt
 *ubyte

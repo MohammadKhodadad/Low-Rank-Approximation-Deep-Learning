@@ -1,9 +1,15 @@
+import io
+import os
 import math
 import tqdm
 import torch
+import numpy as np
 import torch.nn as nn
+from time import time
 from torch.optim import Adam
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
+
+
 
 class SVDConv1D(nn.Module):
     def __init__(self, original_layer, rank=None):
@@ -118,12 +124,69 @@ def train(model,train_loader,test_loader,
     for epoch in range(epochs):
         total_loss = 0
         model.train()
+        time_records=[]
         for batch in tqdm.tqdm(train_loader):
+            start_time=time()
             outputs=model(**batch,labels=batch['input_ids'])
             loss=outputs.loss
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+            time_records.append(time() - start_time)
         average_loss=total_loss/len(train_loader)
         print(f"EPOCH: {epoch}, loss: {average_loss}, test_perplexity: {evaluate_perplexity(model, test_loader, tokenizer)}")
+    return np.mean(time_records)
+
+
+
+
+
+def evaluate_inference_time(model,test_loader,tokenizer,device,iters=32):
+    model.to(device)
+    with torch.no_grad():
+        time_records=[]
+        batch=next(iter(test_loader))
+        for _ in range(iters):
+            for i in range(batch['input_ids'].shape[0]):
+                inputs = {key:batch[key][i:i+1].to(device) for key in batch.keys()}
+                start_time=time()
+                outputs = model(**inputs)
+                time_records.append(time() - start_time)
+    return np.mean(time_records)
+
+def count_all_param(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad), sum(p.numel() for p in model.parameters())
+
+def get_model_size(model):
+    with torch.no_grad():
+        buffer = io.BytesIO()
+        torch.save(model.state_dict(), buffer)
+        model_size_bytes = buffer.getbuffer().nbytes
+    return model_size_bytes
+
+
+
+def run_pipeline(model,train_loader,test_loader,
+          tokenizer,optimizer,loss_function, 
+          device,epochs=5,name=None):
+    print('model_size calculation...')
+    model_size=get_model_size(model)
+    print('params counting...')
+    trainable_params,all_params=count_all_param(model)
+    print('inference time analysis...')
+    cpu_inference_time=evaluate_inference_time(model,test_loader,tokenizer,'cpu')
+    gpu_inference_time=evaluate_inference_time(model,test_loader,tokenizer,'cuda')
+    print('evaluation before training...')
+    base_perplexity=evaluate_perplexity(model,test_loader,tokenizer)
+    print('training...')
+    training_time=train(model,train_loader,test_loader,
+          tokenizer,optimizer,loss_function, 
+          epochs)
+    print('evaluation after training...')
+    after_train_perplexity=evaluate_perplexity(model,test_loader,tokenizer)
+    print("FINISHED.")
+    return {'name':name,'model_size':model_size,'trainable_params':trainable_params,'all_params':all_params,\
+        'cpu_inference_time':cpu_inference_time,'gpu_inference_time':gpu_inference_time, \
+        'base_perplexity':base_perplexity, 'training_time':training_time, 'after_train_perplexity':after_train_perplexity}
+
