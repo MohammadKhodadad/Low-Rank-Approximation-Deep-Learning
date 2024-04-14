@@ -3,6 +3,7 @@ import glob
 import numpy as np
 import torch
 from torch.utils.data import Dataset,Subset,DataLoader
+np.random.seed(42)
 def load_book(address):
     with open(address,'r', errors='ignore',encoding='utf-8') as f:
         text = ''.join(f.readlines())

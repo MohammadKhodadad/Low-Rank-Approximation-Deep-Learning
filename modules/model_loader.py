@@ -121,7 +121,7 @@ def evaluate_perplexity(model, test_loader, tokenizer):
     return perplexity
 def train(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
-          epochs=5):
+          epochs=5,name=None):
     history=[]
     for epoch in range(epochs):
         total_loss = 0
@@ -140,6 +140,8 @@ def train(model,train_loader,test_loader,
         test_perplexity=evaluate_perplexity(model, test_loader, tokenizer)
         history.append({'epoch':epoch,'train_loss':average_loss,'test_perplexity':test_perplexity})
         print(f"EPOCH: {epoch}, loss: {average_loss}, test_perplexity: {test_perplexity}")
+    if name:
+        torch.save(model.state_dict(), f'{name}.pth')
     return np.mean(time_records),history
 
 
@@ -186,7 +188,7 @@ def run_pipeline(model,train_loader,test_loader,
     print('training...')
     training_time,history=train(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
-          epochs)
+          epochs,name)
     print('evaluation after training...')
     after_train_perplexity=evaluate_perplexity(model,test_loader,tokenizer)
     print("FINISHED.")
