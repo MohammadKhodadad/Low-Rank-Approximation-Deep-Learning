@@ -5,13 +5,13 @@ from modules.data_loader import *
 from modules.model_loader import *
 
 
-
+n_epochs=128
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model,tokenizer,optimizer,loss_function = load_model_utils(device=device)
 train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device)
 gpt_results=run_pipeline(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
-          device,30,'gpt2')
+          device,n_epochs,'gpt2')
 
 
 
@@ -33,7 +33,7 @@ model=apply_Lowrank(model,layers=layers,ranks=ranks,layer_names=layer_names,devi
 
 svd_results=run_pipeline(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
-          device,30,'svd')
+          device,n_epochs,'svd')
 
 
 
@@ -55,4 +55,4 @@ model=apply_Lowrank(model,layers=layers,ranks=ranks,layer_names=layer_names,devi
 
 svd_results=run_pipeline(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
-          device,30,'lora')
+          device,n_epochs,'lora')
