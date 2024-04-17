@@ -5,7 +5,7 @@ from modules.data_loader import *
 from modules.model_loader import *
 
 
-n_epochs=128
+n_epochs=256
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model,tokenizer,optimizer,loss_function = load_model_utils(device=device)
 train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device)
