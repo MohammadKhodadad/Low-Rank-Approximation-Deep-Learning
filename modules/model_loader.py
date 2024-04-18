@@ -168,7 +168,7 @@ def get_model_size(model):
     with torch.no_grad():
         buffer = io.BytesIO()
         torch.save(model.state_dict(), buffer)
-        model_size_bytes = buffer.getbuffer().nbytes
+        model_size_bytes = buffer.getbuffer().nbytes # DOES NOT GIVE ACCURATE NUMBER CHECK THE FILES!!!
     return model_size_bytes
 
 
