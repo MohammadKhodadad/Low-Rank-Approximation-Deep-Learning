@@ -57,7 +57,7 @@ def apply_Lowrank(model,layers,ranks,layer_names,device='cuda',lowrank_method='l
     assert(len(layers)==len(ranks))
     assert(len(layer_names)==len(ranks))
     assert(lowrank_method in ['lora','svd'])
-    np_old=count_param(model)
+    np_old=sum(p.numel() for p in model.parameters())
     for ind in range(len(layers)):
         if layer_names[ind]=='mlp_c_fc':
             if lowrank_method=='lora':

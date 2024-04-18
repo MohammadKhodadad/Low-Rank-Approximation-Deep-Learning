@@ -29,6 +29,8 @@ for layer in range(12):
         layers.append(layer)
         ranks.append(32)
         layer_names.append(layer_name)
+
+
 model=apply_Lowrank(model,layers=layers,ranks=ranks,layer_names=layer_names,device=device,lowrank_method='svd')
 
 
@@ -51,6 +53,10 @@ for layer in range(12):
         layers.append(layer)
         ranks.append(32)
         layer_names.append(layer_name)
+
+for param in model.parameters():
+        param.requires_grad = False
+
 model=apply_Lowrank(model,layers=layers,ranks=ranks,layer_names=layer_names,device=device,lowrank_method='lora')
 
 
