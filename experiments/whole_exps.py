@@ -5,10 +5,11 @@ from modules.data_loader import *
 from modules.model_loader import *
 
 
-n_epochs=256
+n_epochs=128
+print(n_epochs)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model,tokenizer,optimizer,loss_function = load_model_utils(device=device)
-train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device)
+train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device,batch_size=32)
 gpt_results=run_pipeline(model,train_loader,test_loader,
           tokenizer,optimizer,loss_function, 
           device,n_epochs,'gpt2')
@@ -17,7 +18,7 @@ gpt_results=run_pipeline(model,train_loader,test_loader,
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model,tokenizer,optimizer,loss_function = load_model_utils(device=device)
-train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device)
+train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device,batch_size=32)
 
 
 layers=[]
@@ -39,7 +40,7 @@ svd_results=run_pipeline(model,train_loader,test_loader,
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model,tokenizer,optimizer,loss_function = load_model_utils(device=device)
-train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device)
+train_dataset,test_dataset,train_loader,test_loader=pipeline_load_dataset(tokenizer,device=device,batch_size=32)
 
 
 layers=[]
