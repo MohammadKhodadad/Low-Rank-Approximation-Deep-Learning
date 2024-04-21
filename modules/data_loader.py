@@ -64,3 +64,5 @@ def pipeline_load_dataset(tokenizer,max_length=256,batch_size=4,device='cuda'):
     train_loader= DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
     test_loader= DataLoader(test_dataset,batch_size=batch_size,shuffle=False)
     return train_dataset,test_dataset,train_loader,test_loader
+
+
